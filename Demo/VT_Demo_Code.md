@@ -4,6 +4,22 @@ This is the detailed explanation of the demo code from the repo related to [Dete
 
 Pycharm is being used to understand the code. Find the detailed explanation of the PyCharm in the related XMind file.
 
+## Using Conda environment in PyCharm
+With this repo the `environment.yml` file is provided. In order to use the environment in PyCharm, open the directory that contains the `.yml` file and PyCharm will suggest you to create the environment.
+
+- Note:
+  This demo is using the python 3.5, but PyCharm does not support it and suggests to use newer versions! Just ignore it and continue with 3.5 :)
+## Overview
+- Logging:
+
+  To understand what is going on instead of printing, logging is used which is better since it saves the output in a log file and doesn't print all of it. To do so, import the logging module, configure it and then use it whenever needed.
+
+  ```
+  import logging
+  logging.basicConfig(filename='my.log',level='DEBUG')
+  ```
+  Here we are asking to save the output in a file called `my.log` and we are using it as a debugger. 
+
 ## Modules & Libraries
 ```
 import argparse, os
@@ -62,6 +78,7 @@ from utils import imutils, evaluation
 ```
 from config import *
 ```
+- All the information in the configuration file is imported.
 ## Parsing
 It is a way of adding a positional or optional arguments to your code when you run it on the command line. It is easier than oppening the code and adding arguments.
 ```
@@ -111,6 +128,13 @@ def run():
     df['top'] -= (df['bottom']-df['top'])*0.1
     df['bottom'] += (df['bottom']-df['top'])*0.1
 ```
+  - What is `df` ?
+  Using the `logging` we can understand what is `df` storing. After the definition of `df` use:
+  ```
+  logging.debug(df)
+  ```
+  After running the code, in the `my.log` file you will find the frame-name, and information of the left, top, right and bottom columns.
+  ![df](debugging1.png)
  - Setting up the data transformation
 
  Here the aforementioned function `_get_transform()` is getting used.
