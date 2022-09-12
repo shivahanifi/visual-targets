@@ -124,5 +124,5 @@ python demo.py
 
 # Result 
 Running the code correctly will result in frames like
-![sample](Figure_1.png)
+![sample](images/Figure_1.png)
 

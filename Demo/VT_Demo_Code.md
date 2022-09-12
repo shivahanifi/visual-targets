@@ -10,6 +10,7 @@ With this repo the `environment.yml` file is provided. In order to use the envir
 - Note:
   This demo is using the python 3.5, but PyCharm does not support it and suggests to use newer versions! Just ignore it and continue with 3.5 :)
 ## Overview
+  [Debugging skills](https://www.youtube.com/watch?v=k6j1NkVAsuU)
 - Logging:
 
   To understand what is going on instead of printing, logging is used which is better since it saves the output in a log file and doesn't print all of it. To do so, import the logging module, configure it and then use it whenever needed.
@@ -78,7 +79,8 @@ from utils import imutils, evaluation
 ```
 from config import *
 ```
-- All the information in the configuration file is imported.
+- All the information in the configuration file is imported. Putting a breakpoint for a point after this level it will result in:
+![config](images/config.png)
 ## Parsing
 It is a way of adding a positional or optional arguments to your code when you run it on the command line. It is easier than oppening the code and adding arguments.
 ```
@@ -112,12 +114,14 @@ def _get_transform():
     transform_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
     return transforms.Compose(transform_list)
 ```
+Adding a breakpoin will result in:
+![transform](images/transforms.png)
 
 2. `run()`
-
+  
   - At the first part of the function `pd.read_csv` from pandas is used to read a comma-seperated values (csv) into a DataFrame. 
 
-    `args.head` is the value that we get from the parsing. either we insert a value or we get a value from the dfault path.
+    `args.head` is the value that we get from the parsing. either we insert a value or we get a value from the dfault path which heads to the [person1.txt](https://github.com/ejcgt/attention-target-detection/blob/master/data/demo/person1.txt) file.
      
 ```
 def run():
@@ -133,8 +137,14 @@ def run():
   ```
   logging.debug(df)
   ```
-  After running the code, in the `my.log` file you will find the frame-name, and information of the left, top, right and bottom columns.
-  ![df](debugging1.png)
+  After running the code, in the `my.log` file you will find the frame-name, and information of the left, top, right and bottom columns. Which are giving the positions of the head bounding box.
+  ![df](images/debugging1.png)
+
+
+  Changing the 0.1 to 2 in the `df['left']` will result in:
+  ![df2](images/Figure_2.png)
+  Which is obviously changing the bounding box.
+
  - Setting up the data transformation
 
  Here the aforementioned function `_get_transform()` is getting used.
@@ -149,12 +159,28 @@ def run():
 
  ```
     model = ModelSpatial()
+ ```
+ ![model](images/model.png)
+ ```
     model_dict = model.state_dict()
+ ```
+ ![model_dict](images/model_dict.png)
+ ```
     pretrained_dict = torch.load(args.model_weights)
+ ```
+ ![pretrained1](images/pretrained1.png)
+ ```
     pretrained_dict = pretrained_dict['model']
+ ```
+ ![pretrained2](images/pretrained2.png)
+ ```
     model_dict.update(pretrained_dict)
+ ```
+ ![model_dict2](images/model_dict2.png)
+ ```
     model.load_state_dict(model_dict)
-
+ ```
+ ```
     model.cuda()
     model.train(False)
  ```
@@ -168,6 +194,12 @@ def run():
             frame_raw = frame_raw.convert('RGB')
             width, height = frame_raw.size
  ```
+ In oredr to log the `width` and `height` we can use logging here.
+ ```
+ logging.debug(width)
+ logging.debug(height)
+ ```
+ ![w,h](images/width,height.png)
 
   - Head Bounding Box
 
@@ -175,34 +207,67 @@ def run():
 
 
  ```
-
-            head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
-
-            head = frame_raw.crop((head_box)) # head crop
-
-            head = test_transforms(head) # transform inputs
-            frame = test_transforms(frame_raw)
-            head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
-                                                        resolution=input_resolution).unsqueeze(0)
-
-            head = head.unsqueeze(0).cuda()
-            frame = frame.unsqueeze(0).cuda()
-            head_channel = head_channel.unsqueeze(0).cuda()
+ head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
  ```
+ Adding a breakpoint will show that:
+ ![head_box](images/head_box.png) 
+ ```
+ head = frame_raw.crop((head_box)) # head crop
+ ```
+ ![head1](images/head1.png)
+ ```
+ head = test_transforms(head) # transform inputs
+ ```
+ ![head2](images/head2.png)
+ ```
+ frame = test_transforms(frame_raw)
+ ```
+ ![frame](images/frame.png)
+ ```
+ head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
+                                                        resolution=input_resolution).unsqueeze(0)
+```
+![head_channel](images/head_channel.png)
+```
+ head = head.unsqueeze(0).cuda()
+ frame = frame.unsqueeze(0).cuda()
+ head_channel = head_channel.unsqueeze(0).cuda()
+ ```
+ Considering the head, The difference with the output of line 77, is that here the device and shape has changed.
+ ![head3](images/head3.png)
   -  Forward Pass
  ```
             
-            raw_hm, _, inout = model(frame, head_channel, head)
+   raw_hm, _, inout = model(frame, head_channel, head)
  ```
+ ![raw_hm1](images/raw_hm1.png)
  - Heatmap modulation
  ```
-            raw_hm = raw_hm.cpu().detach().numpy() * 255
-            raw_hm = raw_hm.squeeze()
-            inout = inout.cpu().detach().numpy()
-            inout = 1 / (1 + np.exp(-inout))
-            inout = (1 - inout) * 255
-            norm_map = imresize(raw_hm, (height, width)) - inout
+ raw_hm = raw_hm.cpu().detach().numpy() * 255
  ```
+ ![raw_hm2](images/raw_hm2.png)
+
+ ```
+ raw_hm = raw_hm.squeeze()
+ ```
+ ![raw_hm3](images/raw_hm3.png)
+ ```
+ inout = inout.cpu().detach().numpy()
+ ```
+
+ ![inout](images/inout.png)
+ ```
+ inout = 1 / (1 + np.exp(-inout))
+ ```
+  ![inout2](images/inout2.png)
+ ```
+ inout = (1 - inout) * 255
+ ```
+  ![inout3](images/inout3.png)
+ ```
+  norm_map = imresize(raw_hm, (height, width)) - inout
+ ```
+ ![norm_map](images/norm_map.png)
  - Visualization
  ```
             plt.close()
@@ -214,7 +279,8 @@ def run():
             ax = plt.gca()
             rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
             ax.add_patch(rect)
-
+ ```
+ ```
             if args.vis_mode == 'arrow':
                 if inout < args.out_threshold: # in-frame gaze
                     pred_x, pred_y = evaluation.argmax_pts(raw_hm)
