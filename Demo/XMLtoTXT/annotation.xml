@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<annotation>
+    <folder>Pictures</folder>
+    <filename>taipei101</filename>
+    <path>/home/darrenl/Pictures/taipei101.jpeg</path>
+    <source>
+        <database>Unknown</database>
+    </source>
+    <size>
+        <width>236</width>
+        <height>354</height>
+        <depth>3</depth>
+    </size>
+    <segmented>0</segmented>
+    <object>
+        <name>build</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>23</xmin>
+            <ymin>26</ymin>
+            <xmax>129</xmax>
+            <ymax>308</ymax>
+        </bndbox>
+    </object>
+</annotation>

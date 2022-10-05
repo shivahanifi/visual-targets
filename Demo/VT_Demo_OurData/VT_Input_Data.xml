@@ -1,0 +1,39 @@
+<application>
+<name>VT Input data</name>
+<version>1.0</version>
+
+
+<!-- Modules -->
+    <module>
+        <name>yarpdev</name>
+        <parameters>--from /home/r1-user/code_sh/InputDataApplication/conf/realsense_conf.ini</parameters>
+        <node></node>
+    </module>
+
+    <module>
+        <name>yarpdatadumper</name>
+        <parameters>--name /VTDataCollection:i --type image --rxTime --txTime</parameters>
+        <node>localhost</node>
+    </module>
+
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /view/rgb --w 640 --h 480</parameters>
+        <node>localhost</node>
+    </module>
+
+<!-- Connections -->
+	<connection>
+		<from>/depthCamera/rgbImage:o</from>
+		<to>/view/rgb</to>
+		<protocol>mjpeg</protocol>
+	</connection>
+
+    <connection>
+		<from>/depthCamera/rgbImage:o</from>
+		<to>/VTDataCollection:i</to>
+		<protocol>mjpeg</protocol>
+	</connection>
+    
+</application>
