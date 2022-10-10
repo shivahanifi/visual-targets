@@ -6,14 +6,14 @@ The goal here is to collect input images using the RealSense camera. These image
 1. [YARP](#yarp)
 
 
-   1.1. [How to use docker](#docker)
+   1.1. [Dockeer](#docker)
 
-   1.2. Application Description
+   1.2. [Application Description](#application-description)
 
-   1.3. Collected Data
-2. Intel RealSense Viewer
-
-## YARP <a name="yarp"></a>
+   1.3. [Collected Data](#collected-data)
+2. [Intel RealSense Viewer](#intel-realsense-viewer)
+<a name="yarp"></a>
+## YARP 
 In order to use YARP, the YARP RealSense Device should be among the YARP devices. Check it with 
 ```
 yarpdev --list
@@ -22,7 +22,7 @@ In case it is not present, add it following the link [yarp-device-realsense2](ht
 
 In our case, to have all we need, a docker is used. This is a docker from the [mutual-gaze-classifier-demo](https://github.com/MariaLombardi/mutual-gaze-classifier-demo/tree/main/app) repository.
 
-- How to use the docker? <a name="docker"></a>
+## Docker
   
   1. Clone the repository to your local machine and build the docker. You need to build it once.
   ```
@@ -54,7 +54,7 @@ In our case, to have all we need, a docker is used. This is a docker from the [m
    
 The installed docker did not contain the driver for the RealSense camera, first we installed it and committed the changes in the docker.
   
-
+<a name="description"></a>
 ## Application Description
   Having the yarp RealSense device installed properly, now we need an application XML file to properly connet the ports and modules. The structure we need is as below:
   ![structure](Img/structure.jpeg)
@@ -76,20 +76,24 @@ The installed docker did not contain the driver for the RealSense camera, first 
   ```
   yarp namespace /shiva
   ```
-  If you check the namespace list now you will see only the local machine, but using the command `yarprun` you will create a client-server environment that is able to run the program on a set of machines. Now if you display the list of names you will also see the docker.
+  If you check the namespace list now you will see only the local machine, but using the command `yarprun` you will create a client-server environment that is able to run the program on a set of machines.
   ```
   yarprun --server /docker
-  yarp name list
   ```
 
-## Collected Data
-The data have been collected in 4 different scenarios.
-1. [One person in the scene and two objects on the table.]()
+## [Collected Data]()
+The data have been collected in 4 different scenarios. Here you can see an example of each scenario.
+1. One person in the scene and two objects on the table.
+![1+2](Img/1p2oExample.jpg)
 
-![1+2](/Img/00000016.ppm)
-1. [One person in the scene and four objects on the table.]()
-2. [One person in the scene and seven objects on the table.]()
-3. [Two people in the scene and three objects on the table.]()
+2. One person in the scene and four objects on the table
+![1+4](Img/1p4oExample.jpg)
+
+3. One person in the scene and seven objects on the table.
+![1+7](Img/1p7oExample.jpg)
+
+4. Two people in the scene and three objects on the table.
+![2+3](Img/2p3oExample.jpg)
 
 ## Intel RealSense Viewer
 This is another way to record video/image with the RealSense Camera. To do so, install the [RealSense SDK](https://www.intelrealsense.com/sdk-2/). One of the tools is the `Viewer`. Find the user's guide for the viewer [here](https://www.intelrealsense.com/download/7144/).
