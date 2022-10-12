@@ -1,8 +1,14 @@
+# Running The Demo
 This is a detailed explanation of running the demo from the repo related to [Detecting Attended Visual Targets in Video](https://github.com/ejcgt/attention-target-detection).
 
-# Running The Demo
+- [Running The Demo](#running-the-demo)
+  - [Conda Environment Explained](#conda-environment-explained)
+    - [Recreating Conda Environment](#recreating-conda-environment)
+    - [W/O Conda Environment](#wo-conda-environment)
+  - [Result](#result)
 
-### Conda Environment
+
+## Conda Environment Explained
 
 To avoid version mismatches and errors, it is always recommended to use the environment they have pprovided.
 
@@ -17,25 +23,25 @@ Anaconda Server enables you to upload, move, copy, share, and download an enviro
 
   YAML is a data serialization language that is often used for writing configuration files. Depending on whom you ask, YAML stands for yet another markup language or YAML ain't markup language (a recursive acronym), which emphasizes that YAML is for data, not documents.
 
-### Recreating The Environment
+### Recreating Conda Environment
 
-1. Installing Conda
+  1. Installing Conda
   
-    If you don't have conda installed, follow the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
+      If you don't have conda installed, follow the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
 
-    ### Note:        
-    Conda is a package manager. It helps you take care of your different packages by handling installing, updating and removing them. 
+      ### Note:        
+      Conda is a package manager. It helps you take care of your different packages by handling installing, updating and removing them. 
   
-    Anaconda contains all of the most common packages (tools) a data scientist needs and can be considered the hardware store of data science tools.
+      Anaconda contains all of the most common packages (tools) a data scientist needs and can be considered the hardware store of data science tools.
 
-    Miniconda is different from Anaconda in the sense of number of packages and interface.
+      Miniconda is different from Anaconda in the sense of number of packages and interface.
 
-2. Creating The Environment
+  2. Creating The Environment
 
-    Follow the instructions provided [here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
+      Follow the instructions provided [here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)
 
-    ### Errors!
-    - Python & pip
+      ### Errors!
+       - Python & pip
     
       There was a problem with the Python and pip versions.
 
@@ -71,9 +77,9 @@ Anaconda Server enables you to upload, move, copy, share, and download an enviro
 
       conda clean -a
 
-Didn't reach a clear solution!
+  Didn't reach a clear solution!
 
-## Errors
+### W/O Conda Environment
 Without the environment too many errors will appear.
 - ``from scipy.misc import imresize``
   
@@ -107,22 +113,22 @@ Without the environment too many errors will appear.
   numpy.random.bit_generator = numpy.random._bit_generator
   ```   
   Didn't work.
-
-# Environment Created
+ 
+## Running The Code
 
 If you managed to create the environment successfully, now you should run the demo code in that environment. Make sure you have the GPU related stuff (CUDA, Nvidia, cudNN, etc.).
 ```
 python demo.py
 ```
-## Errors
-1. `No such file or directory: model_demo.pt`
+  ### Errors
+  1. `No such file or directory: model_demo.pt`
 
   This is a file that has the model weights saved as a tensor. Usually this kind of file is not included in the repo and they give a link to download it, which is also the case in here. This error will be solved by downloading the `download_model.sh` file.
   ```
   sh download_models.sh
   ```
 
-# Result 
+## Result 
 Running the code correctly will result in frames like
 ![sample](images/Figure_1.png)
 
