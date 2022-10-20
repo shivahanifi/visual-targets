@@ -23,9 +23,8 @@ from config import *
 IMAGE_WIDTH = 640
 IMAGE_HEIGHT = 480
 JOINTS_POSE_FACE = [0, 15, 16, 17, 18]
-TXT_FILE_DIR = '/Users/shiva.hnf/Documents/IIT/visual-targets/Demo/VT_Demo_Development/pose.txt'
-JSON_FILES_DIR = '/Users/shiva.hnf/Documents/IIT/visual-targets/Demo/VT_Demo_Development/testset/board_images_human_openpose_json'
-FRAMES_DIR = '/Users/shiva.hnf/Documents/IIT/visual-targets/Demo/VT_Demo_Development/testset/board_images_human'
+TXT_FILE_PATH = '/Users/shiva.hnf/Documents/IIT/visual-targets/Demo/VT_Demo_Development/pose.txt'
+JSON_FILES_PATH = '/Users/shiva.hnf/Documents/IIT/visual-targets/Demo/VT_Demo_Development/testset/board_images_human_openpose_json'
 
 #Keypoint extraction
 def read_openpose_from_json(json_filename):
@@ -98,18 +97,18 @@ def get_openpose_bbox(pose):
 
 
 #collecting all the openpose json files (CHANGE THE PATH)
-listOfFiles = os.listdir(JSON_FILES_DIR)
+listOfFiles = os.listdir(JSON_FILES_PATH)
 
 
 #detecting bounding boxes
-f = open(TXT_FILE_DIR,'w') #Creates a new file
+f = open(TXT_FILE_PATH,'w') #Creates a new file
 f.close()
 for j in listOfFiles:
     poses, conf_poses, faces, conf_faces = read_openpose_from_json(j)
     min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
     line_to_write = j + ',' + min_x + ',' + min_y + ',' + max_x + ',' + max_y + '\n'
     #writing to the txt file
-    with open(TXT_FILE_DIR , 'a') as f:
+    with open(TXT_FILE_PATH, 'a') as f:
       f.write(line_to_write)     
 
 
@@ -117,7 +116,7 @@ for j in listOfFiles:
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_weights', type=str, help='model weights', default='model_demo.pt')
 parser.add_argument('--image_dir', type=str, help='images', default='data/demo/frames')
-parser.add_argument('--head', type=str, help='head bounding boxes', default=TXT_FILE_DIR)
+parser.add_argument('--head', type=str, help='head bounding boxes', default=TXT_FILE_PATH)
 parser.add_argument('--vis_mode', type=str, help='heatmap or arrow', default='heatmap')
 parser.add_argument('--out_threshold', type=int, help='out-of-frame target dicision threshold', default=100)
 args = parser.parse_args()

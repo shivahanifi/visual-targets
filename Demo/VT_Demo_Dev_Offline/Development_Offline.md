@@ -1,4 +1,4 @@
-# Developing the Demo Code
+# Developing the Demo Code with Test Set
 
 
 ## Table of Contents
@@ -9,10 +9,12 @@
 
     2.2. [Using OpenPose Keypoints](#using-openpose-keypoints)
 
+    2.3. [Code Modification](#code-modification)
+
 
 
 ## Road Map
-The goal is to add specific features to the demo code. The first step is to replace the manual bounding box extraction with an automatic one. To do so, the code structure has to change and YARP needs to be included. Additionally, as an output attention point or attention bounding box is added. The ultimate structure in mind is as shown below.
+The goal is to add specific features to the demo code. The first step is to replace the manual bounding box extraction with functions and test it. A further step would be to involve YARP and make the application online. The structure is as shown below.
 
 ![Roadmap](Img/roadmap.jpg)
 
@@ -34,17 +36,21 @@ JSON (JavaScript Object Notation) is an open standard file format and data inter
 - `hand_left_keypoints_3d`
 - `hand_right_keypoints_3d`
 
-With this file only `pose_keypoints_2d` and `face_keypoints_2d` contains information. For the other lists, since the related flags were not enabled they are empty.
+With this file only `pose_keypoints_2d` and `face_keypoints_2d` contains information. For the other lists, since the related flags were not enabled they are empty. 
 - `pose_keypoints_2d`: There are 25 keypoints in a skeleton as shown below. For each keypoint its position (x y) and confidence level are recorded. Therefore, this list contains 75 (25*3) elements. 
 
-    To be more clear, element 0 in the list (291.568) is the x for the nose, element 1 (171.459) is the y for the nose and element 3 (0.862217) is the confidenece level for the nose.
+    To be more clear, element 0 in the list (291.568) is the x for the nose, element 1 (171.459) is the y for the nose and element 2 (0.862217) is the confidenece level for the nose.
 
     <img src="Img/pose_keypoints.png" alt="pose" width="250"/>
 
 - `face_keypoints_2d`: There are 70 keypoints in a face as shown below. As mentioned, For each keypoint its position (x y) and confidence level are recorded. Therefore, this list contains 210 (70*3) elements.
 
     <img src="Img/face_keypoints.png" alt="face" width="400"/>
-  
+
+In summary, For each image there are:
+
+<img src="Img/json.png" alt="face" width="600"/> 
+
 ### Using OpenPose Keypoints
 - `read_openpose_from_json`
   
@@ -65,3 +71,11 @@ With this file only `pose_keypoints_2d` and `face_keypoints_2d` contains informa
     To extract the bounding box, a function from [face-recogniser-demo](https://github.com/MariaLombardi/face-recogniser-demo/blob/main/src/functions/utilities.py) will be used. This function adds margins to the centroid and creates the bounding box.
 
     Note that `JOINTS_POSE_FACE` should be defined as a constant and alòso the `joint_set(p)` function.
+
+### Code Modification
+1. For the head arguments in the parser, replace the path to the directory where JSON files exist.
+2. As mentioned in the [VT_Demo_Code](https://github.com/shivahanifi/visual-targets/blob/main/Demo/VT_Demo_Code.md) The `df` has the structure as below:
+
+     <img src="Img/df.png" alt="face" width="400"/>  
+
+    The goal is to use the output of the function `get_openpose_bbox` which is `min_x, min_y, max_x, max_y` directly in the `df`.
