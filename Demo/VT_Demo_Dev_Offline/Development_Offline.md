@@ -73,9 +73,24 @@ In summary, For each image there are:
     Note that `JOINTS_POSE_FACE` should be defined as a constant and alòso the `joint_set(p)` function.
 
 ### Code Modification
-1. For the head arguments in the parser, replace the path to the directory where JSON files exist.
-2. As mentioned in the [VT_Demo_Code](https://github.com/shivahanifi/visual-targets/blob/main/Demo/VT_Demo_Code.md) The `df` has the structure as below:
+1. Instead of acquiring the head arguments from the parser as a single TXT file, here it should reach each JSON file for each image and get the information from them.
+   ```
+   listOfJson = glob.glob(JSON_FILES)
+   ``` 
+2. As mentioned in the [VT_Demo_Code](https://github.com/shivahanifi/visual-targets/blob/main/Demo/VT_Demo_Code.md) The DataFrame, `df`, has the structure as below:
 
      <img src="Img/df.png" alt="face" width="400"/>  
 
     The goal is to use the output of the function `get_openpose_bbox` which is `min_x, min_y, max_x, max_y` directly in the `df`.
+
+    Since there are sepearte JSON files for each image, in the `run` function we will iterate over them to create a single DataFrame. The created `df` will be fed into the rest of the code.
+    ```
+    column_names = ['frame', 'left', 'top', 'right', 'bottom']
+    df = pd.DataFrame()
+    for j in range(len(listOfJson)):
+        poses, conf_poses, faces, conf_faces = read_openpose_from_json(listOfJson[j])
+        min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
+        line_to_write = j + ',' + min_x + ',' + min_y + ',' + max_x + ',' + max_y + '\n'
+        df_tmp = pd.read_csv(line_to_write, names=column_names, index_col=0)
+        df.append(df_tmp)
+    ```
