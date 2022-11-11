@@ -85,17 +85,7 @@ In summary, For each image there are:
 
     The goal is to use the output of the function `get_openpose_bbox` which is `min_x, min_y, max_x, max_y` directly in the `df`.
 
-    Since there are sepearte JSON files for each image, in the `run` function we will iterate over them to create a single DataFrame. The created `df` will be fed into the rest of the code.
-    ```
-    column_names = ['frame', 'left', 'top', 'right', 'bottom']
-    df = pd.DataFrame()
-    for j in range(len(listOfJson)):
-        poses, conf_poses, faces, conf_faces = read_openpose_from_json(listOfJson[j])
-        min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
-        line_to_write = j + ',' + min_x + ',' + min_y + ',' + max_x + ',' + max_y + '\n'
-        df_tmp = pd.read_csv(line_to_write, names=column_names, index_col=0)
-        df.append(df_tmp)
-    ```
+    Since there are sepearte JSON files for each image, in the `run` function we will iterate over them to create a single DataFrame. The created `df` will be fed into the rest of the code. 
 
 ## Errors
   - List Index Out of Range
@@ -146,25 +136,25 @@ In summary, For each image there are:
     ```
 - TypeError: join() argument must be str or bytes, not 'int'
   
-The problem is that the names for the JSON files is different from the names for the images and it is not possible to open the i images with those names. To overcome the issue, I used `STRING.split()` to give the exact names of the images and match them with related JSON files.
+    The problem is that the names for the JSON files is different from the names for the images and it is not possible to open the i images with those names. To overcome the issue, I used `STRING.split()` to give the exact names of the images and match them with related JSON files.
 
-```
-#extracting image names
-idx = []
-for b in listOfJson:
-    txt = b.split('/')
-    txt1 = txt[6].split('_')
-    txt2 = txt1[0] + '.jpg'
-    idx.append(txt2)
-```
-Used the image names when opening the images:
-```
-frame_raw = Image.open(os.path.join(args.image_dir, str(idx[i])))
-```
+    ```
+    #extracting image names
+    idx = []
+    for b in listOfJson:
+        txt = b.split('/')
+        txt1 = txt[6].split('_')
+        txt2 = txt1[0] + '.jpg'
+        idx.append(txt2)
+    ```
+    Used the image names when opening the images:
+    ```
+    frame_raw = Image.open(os.path.join(args.image_dir, str(idx[i])))
+    ```
 - The image sizes were also changed using:
-```
-plt.rcParams["figure.figszie"] = [20.00,20.00]
-```
+    ```
+    plt.rcParams["figure.figszie"] = [20.00,20.00]
+    ```
 ## Result
 The figure is a sample of the result. The complete set of results and a video is provided in the related repository.
 
