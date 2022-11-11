@@ -10,6 +10,8 @@
     2.2. [Using OpenPose Keypoints](#using-openpose-keypoints)
 
     2.3. [Code Modification](#code-modification)
+3. [Errors](#errors)
+4. [Result](#result)
 
 
 
@@ -70,7 +72,7 @@ In summary, For each image there are:
     
     To extract the bounding box, a function from [face-recogniser-demo](https://github.com/MariaLombardi/face-recogniser-demo/blob/main/src/functions/utilities.py) will be used. This function adds margins to the centroid and creates the bounding box.
 
-    Note that `JOINTS_POSE_FACE` should be defined as a constant and alòso the `joint_set(p)` function.
+    Note that `JOINTS_POSE_FACE` should be defined as a constant and also the `joint_set(p)` function.
 
 ### Code Modification
 1. Instead of acquiring the head arguments from the parser as a single TXT file, here it should reach each JSON file for each image and get the information from them.
@@ -94,3 +96,76 @@ In summary, For each image there are:
         df_tmp = pd.read_csv(line_to_write, names=column_names, index_col=0)
         df.append(df_tmp)
     ```
+
+## Errors
+  - List Index Out of Range
+  
+    There was an index error related to the `get_openpose_bbox` function. The original  function treats the pose as a list. When trying to get the poses related to the joints in the `JOINTS_POSE_FACE` I was receiving the error and getting the log showed that it only was taking the poses related to the first joint only. I am using it inside a loop, therefore the `poses` is in a matrix format and not a list. Modifyin the format as below helped to solve the index problem.
+    
+
+    ```
+    def get_openpose_bbox(pose):
+
+    n_joints_set = [pose[0][joint] for joint in JOINTS_POSE_FACE if joint_set(pose[0][joint])]
+    logging.debug(n_joints_set)
+    if n_joints_set:
+        centroid = compute_centroid(n_joints_set)
+
+        min_x = min([joint[0] for joint in n_joints_set])
+        max_x = max([joint[0] for joint in n_joints_set])
+        min_x -= (max_x - min_x) * 0.2
+        max_x += (max_x - min_x) * 0.2
+        width = max_x - min_x
+
+        min_y = centroid[1] - (width/3)*2
+        max_y = centroid[1] + (width/3)*2
+        min_x = math.floor(max(0, min(min_x, IMAGE_WIDTH)))
+        max_x = math.floor(max(0, min(max_x, IMAGE_WIDTH)))
+        min_y = math.floor(max(0, min(min_y, IMAGE_HEIGHT)))
+        max_y = math.floor(max(0, min(max_y, IMAGE_HEIGHT)))
+
+        return min_x, min_y, max_x, max_y
+    else:
+        #print("Joint set empty!")
+        return None, None, None, None
+    ```
+- ValueError: Wrong number of items passed 1, placement implies 5
+  
+    +There are different ways to create a DataFrame. Here the problem was related to the dimension, since I was assigning a list of data with length of 5 to a list of columns with length of 5, which creates a DataFrame of the shape 5*5. Because a list is fed to the DataFrame vertically. Therefore, the solution was to change the data in the form of list of list so that it has a length of 1 and it fit under the shape of `column_names`.
+
+        ```
+        line_to_write = [[j, min_x, min_y, max_x, max_y]]
+        ```
+
+- DataFrame not appending the temporary DataFrame
+
+     The problem here is that in order to see the result of append, You need to assign the result back.
+
+    ```
+    df = df.append(df_tmp, ignore_index=True)
+    ```
+- TypeError: join() argument must be str or bytes, not 'int'
+  
+The problem is that the names for the JSON files is different from the names for the images and it is not possible to open the i images with those names. To overcome the issue, I used `STRING.split()` to give the exact names of the images and match them with related JSON files.
+
+```
+#extracting image names
+idx = []
+for b in listOfJson:
+    txt = b.split('/')
+    txt1 = txt[6].split('_')
+    txt2 = txt1[0] + '.jpg'
+    idx.append(txt2)
+```
+Used the image names when opening the images:
+```
+frame_raw = Image.open(os.path.join(args.image_dir, str(idx[i])))
+```
+- The image sizes were also changed using:
+```
+plt.rcParams["figure.figszie"] = [20.00,20.00]
+```
+## Result
+The figure is a sample of the result. The complete set of results and a video is provided in the related repository.
+
+<img src="Img/fig26.png" alt="pose" width="400"/>
