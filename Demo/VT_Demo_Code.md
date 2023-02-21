@@ -161,32 +161,45 @@ def run():
     model = ModelSpatial()
  ```
  ![model](images/model.png)
+
+
  ```
     model_dict = model.state_dict()
  ```
  ![model_dict](images/model_dict.png)
+
+
  ```
     pretrained_dict = torch.load(args.model_weights)
  ```
  ![pretrained1](images/pretrained1.png)
+
+
  ```
     pretrained_dict = pretrained_dict['model']
  ```
  ![pretrained2](images/pretrained2.png)
+
+
  ```
     model_dict.update(pretrained_dict)
  ```
  ![model_dict2](images/model_dict2.png)
+
+
  ```
     model.load_state_dict(model_dict)
  ```
+
+
  ```
     model.cuda()
     model.train(False)
  ```
+
  - Loop
 
-    - Here it disables the autograd, then for each image in the dataset, converts it to RGB and saves its size.
+  Here it disables the autograd, then for each image in the dataset, converts it to RGB and saves its size.
   ```
   with torch.no_grad():
         for i in df.index:
@@ -201,102 +214,133 @@ def run():
  ```
  ![w,h](images/width,height.png)
 
+
   - Head Bounding Box
 
     The bounding box for the head is extracted using the data from the `df`
+      ```
+      head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
+      ```
+    Adding a breakpoint will show that:
+    ![head_box](images/head_box.png) 
 
 
- ```
- head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
- ```
- Adding a breakpoint will show that:
- ![head_box](images/head_box.png) 
  ```
  head = frame_raw.crop((head_box)) # head crop
  ```
  ![head1](images/head1.png)
+
+
  ```
  head = test_transforms(head) # transform inputs
  ```
  ![head2](images/head2.png)
+
+
  ```
  frame = test_transforms(frame_raw)
  ```
  ![frame](images/frame.png)
+
+
  ```
- head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
-                                                        resolution=input_resolution).unsqueeze(0)
+ head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height, resolution=input_resolution).unsqueeze(0)
 ```
 ![head_channel](images/head_channel.png)
+
+
 ```
  head = head.unsqueeze(0).cuda()
  frame = frame.unsqueeze(0).cuda()
  head_channel = head_channel.unsqueeze(0).cuda()
- ```
- Considering the head, The difference with the output of line 77, is that here the device and shape has changed.
+```
+Considering the head, The difference with the output of line 77, is that here the device and shape has changed.
  ![head3](images/head3.png)
+
+
   -  Forward Pass
- ```
-            
-   raw_hm, _, inout = model(frame, head_channel, head)
- ```
- ![raw_hm1](images/raw_hm1.png)
+
+      The raw heatmap (raw_hm) is computed using the `model.py`. The raw_hm created here has the values between 0-1, and the shape (1,1,64,64).
+      ```         
+        raw_hm, _, inout = model(frame, head_channel, head)
+      ```
+      ![raw_hm1](images/raw_hm1.png)
+
+
  - Heatmap modulation
- ```
- raw_hm = raw_hm.cpu().detach().numpy() * 255
- ```
- ![raw_hm2](images/raw_hm2.png)
 
- ```
- raw_hm = raw_hm.squeeze()
- ```
- ![raw_hm3](images/raw_hm3.png)
- ```
- inout = inout.cpu().detach().numpy()
- ```
+    The raw_hm values are adjusted to be between 0-255.
+    ```
+    raw_hm = raw_hm.cpu().detach().numpy() * 255
+    ```
+    ![raw_hm2](images/raw_hm2.png)
 
- ![inout](images/inout.png)
- ```
- inout = 1 / (1 + np.exp(-inout))
- ```
-  ![inout2](images/inout2.png)
- ```
- inout = (1 - inout) * 255
- ```
-  ![inout3](images/inout3.png)
- ```
-  norm_map = imresize(raw_hm, (height, width)) - inout
- ```
- ![norm_map](images/norm_map.png)
- - Visualization
- ```
-            plt.close()
-            fig = plt.figure()
-            fig.canvas.manager.window.move(0,0)
-            plt.axis('off')
-            plt.imshow(frame_raw)
+  
 
-            ax = plt.gca()
-            rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-            ax.add_patch(rect)
- ```
- ```
-            if args.vis_mode == 'arrow':
-                if inout < args.out_threshold: # in-frame gaze
-                    pred_x, pred_y = evaluation.argmax_pts(raw_hm)
-                    norm_p = [pred_x/output_resolution, pred_y/output_resolution]
-                    circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
-                    ax.add_patch(circ)
-                    plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
-            else:
-                plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+    ```
+    raw_hm = raw_hm.squeeze()
+    ```
+   The `squeeze()` function is a method in Python's NumPy library that is used to remove any dimensions with size 1 from a NumPy array. In other words, it "squeezes" the raw_hm by removing any dimensions that have only one element.
+    ![raw_hm3](images/raw_hm3.png)
 
-            plt.show(block=False)
-            plt.pause(0.2)
 
-        print('DONE!')
+    ```
+    inout = inout.cpu().detach().numpy()
+    ```
+    ![inout](images/inout.png)
+
+
+    ```
+    inout = 1 / (1 + np.exp(-inout))
+    ```
+    ![inout2](images/inout2.png)
+
+
+    ```
+    inout = (1 - inout) * 255
+    ```
+    ![inout3](images/inout3.png)
+
+
+    ```
+      norm_map = imresize(raw_hm, (height, width)) - inout
+    ```
+    ![norm_map](images/norm_map.png)
+
+
+- Visualization
+
+  Plotting everything seperately, and finally visualizing all of them on top of each other.
+  ```
+  plt.close()
+  fig = plt.figure()
+  fig.canvas.manager.window.move(0,0)
+  plt.axis('off')
+  plt.imshow(frame_raw)
+
+  ax = plt.gca()
+  rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
+  ax.add_patch(rect)
+  ```
+
+Two different modes can be used for visualization. You can either choose the arrowm mode, in which the visual target is pointed with an arrow (if part), or the heatmap mode (else part) that specifies the visually attended area with a heatmap.
+```
+    if args.vis_mode == 'arrow':
+        if inout < args.out_threshold: # in-frame gaze
+            pred_x, pred_y = evaluation.argmax_pts(raw_hm)
+            norm_p = [pred_x/output_resolution, pred_y/output_resolution]
+            circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
+            ax.add_patch(circ)
+            plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
+    else:
+        plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+
+    plt.show(block=False)
+    plt.pause(0.2)
+
+print('DONE!')
 
 
 if __name__ == "__main__":
     run()
- ```
+```
