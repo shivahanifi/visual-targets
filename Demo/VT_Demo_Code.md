@@ -268,11 +268,15 @@ Considering the head, The difference with the output of line 77, is that here th
 
 
  - Heatmap modulation
-
-    The raw_hm values are adjusted to be between 0-255.
     ```
     raw_hm = raw_hm.cpu().detach().numpy() * 255
     ```
+    This code performs a series of operations on a PyTorch tensor raw_hm.
+    - `raw_hm.cpu()`: This moves the tensor from the device it was on (e.g. GPU) to the CPU. This is necessary because the subsequent numpy() operation can only be performed on tensors located on the CPU.
+    - `.detach()`: This creates a new tensor that shares the same data as raw_hm, but is not part of the computation graph. This means that any operations performed on the detached tensor will not affect the gradients of raw_hm.
+    - `.numpy()`: This converts the PyTorch tensor into a NumPy array. This is useful when working with libraries that expect data in NumPy format, such as Matplotlib or OpenCV.
+
+    Finally, the raw_hm values are adjusted to be between 0-255.
     ![raw_hm2](images/raw_hm2.png)
 
   
