@@ -64,10 +64,10 @@ To use the [ObjectAttention](https://drive.google.com/drive/folders/1qr71qBfq6rk
 To train on the ObjectAttention dataset the code scripts relatd to the data preprocessing and training must be modified. 
 
 - Note that you first need to modify the `config.py` file, and provide the path for the related images and labels. Since the code is being run from inside the docker, even though a shared folder is being used, you should provide the path from inside the docker for the images to be accessible.
-- a new class of dataset is defined for the ObjectAttention dataset in the [dataset.py](https://github.com/ejcgt/attention-target-detection/blob/master/dataset.py). For the images to be readable, the `__getitem__` method is modified, such that when reading the TXT annotation file, since the TXT annotation files I am providing has the header, the `header option is set to 0`. Moreover, the name of the images should be taken completely and as a string. Therefore, the type is specified as string. 
+- a new class of dataset is defined for the ObjectAttention dataset in the [dataset.py](https://github.com/shivahanifi/visual-targets/blob/main/VTD_retrain/src/dataset.py). For the images to be readable, the `__getitem__` method is modified, such that when reading the TXT annotation file, since the TXT annotation files I am providing has the header, the `header option is set to 0`. Moreover, the name of the images should be taken completely and as a string. Therefore, the type is specified as string. 
   ```
   dtype={'frame':str}
   ```
   Also `.ppm` extension is added to the image names when reading them.
   
-- Moreover, for the main training code, the new class related to the ObjectAttention dataset is included and 
+- Moreover, for the main training code [train_on_objectattention.py](), the new class related to the ObjectAttention dataset is included and 
