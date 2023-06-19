@@ -9,6 +9,8 @@ Here I will document the steps to finetune the VTD architecture using the [Objec
     - [Errors](#errors)
   - [Preparing ObjectAttention dataset to finetune VTD](#preparing-objectattention-dataset-to-finetune-vtd)
   - [Trainining on ObjectAttention](#trainining-on-objectattention)
+    - [Initial weights for retraining](#initial-weights-for-retraining)
+    - [Training evaluation](#training-evaluation)
 
 
 ## Feasibility of retraining
@@ -71,3 +73,33 @@ To train on the ObjectAttention dataset the code scripts relatd to the data prep
   Also `.ppm` extension is added to the image names when reading them.
   
 - Moreover, for the main training code [train_on_objectattention.py](), the new class related to the ObjectAttention dataset is included and 
+
+### Initial weights for retraining
+1. In order to retrain the architecture, I first used the [initial_weights_for_temporal_training.pt](https://www.dropbox.com/s/s9y65ajzjz4thve/initial_weights_for_temporal_training.pt) as initial weights. Which are initial weights provided by the VTD authors. Evaluating the training using the [eval_on_objectattention.py]() resulted in AUC score of 0.7803 and distance of 0.1078. 
+2. The second step is to finetune the model using the [model_videoatttarget.pt](https://www.dropbox.com/s/ywd16kcv06vn93x/model_videoatttarget.pt) as initial weights.
+
+At this step to have the original batch size of 16, an external GPU is required.
+
+### Training evaluation
+To evaluate the training I use [eval_on_objectattention.py]() and record the AUC and dist parameters.
+
+- AUC
+  
+  “Area Under the Curve” (AUC) of the “Receiver Operating Characteristic” (ROC). The Receiver Operator Characteristic (ROC) curve is an evaluation metric for binary classification problems. The Area Under the Curve (AUC) is the measure of the ability of a binary classifier to distinguish between classes and is used as a summary of the ROC curve.
+
+  The higher the AUC, the better the model’s performance at distinguishing between the positive and negative classes.
+
+- dist
+
+  The L2 distance between the groundtruth and the argmax point.
+
+  |   Initial weights for training	|  Training dataset  	| 	Weights used for evaluation| AUC |  dist |	
+  |---	|---	|---	|---	|---|
+  |initial_weights_for_temporal_training.pt|  VideoAttentionTarget 	|  model_videoatttarget.pt  |0.8915 	|  0.1682| 
+  |initial_weights_for_temporal_training.pt|  ObjectAttention 	|  epoch_3_weights.pt |0.8569 	|  0.0821|
+  |initial_weights_for_temporal_training.pt|  ObjectAttention 	|  epoch_3_weights.pt |0.8334 	|  0.0876|
+  |initial_weights_for_temporal_training.pt|  ObjectAttention 	|  epoch_3_weights.pt |0.8017 	|  0.0862|
+  |  model_videoatttarget.pt 	|  ObjectAttention |epoch_3_weights.pt	|  0.8686 	|  0.1090 	|
+  |  model_videoatttarget.pt 	|  ObjectAttention |epoch_3_weights.pt	|  0.8520 	|  0.1008 	|
+  |  model_videoatttarget.pt 	|  ObjectAttention |epoch_3_weights.pt	|  0.8207 	|  0.0919 	|
+
