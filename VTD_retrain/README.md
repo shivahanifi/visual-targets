@@ -74,10 +74,10 @@ To train on the ObjectAttention dataset the code scripts relatd to the data prep
   ```
   Also `.ppm` extension is added to the image names when reading them.
   
-- Moreover, for the main training code [train_on_objectattention.py](), the new class related to the ObjectAttention dataset is included and 
+- Moreover, for the main training code [train_on_objectattention.py](https://github.com/shivahanifi/visual-targets/blob/main/VTD_retrain/src/train_on_objectattention.py), the new class related to the ObjectAttention dataset is included and 
 
 ### Initial weights for retraining
-1. In order to retrain the architecture, I first used the [initial_weights_for_temporal_training.pt](https://www.dropbox.com/s/s9y65ajzjz4thve/initial_weights_for_temporal_training.pt) as initial weights. Which are initial weights provided by the VTD authors. Evaluating the training using the [eval_on_objectattention.py]() resulted in AUC score of 0.7803 and distance of 0.1078. 
+1. In order to retrain the architecture, I first used the [initial_weights_for_temporal_training.pt](https://www.dropbox.com/s/s9y65ajzjz4thve/initial_weights_for_temporal_training.pt) as initial weights. Which are initial weights provided by the VTD authors. Evaluating the training using the [eval_on_objectattention.py](https://github.com/shivahanifi/visual-targets/blob/main/VTD_retrain/src/eval_on_objectattention.py) resulted in AUC score of 0.7803 and distance of 0.1078. 
 2. The second step is to finetune the model using the [model_videoatttarget.pt](https://www.dropbox.com/s/ywd16kcv06vn93x/model_videoatttarget.pt) as initial weights.
 
 At this step to have the original batch size of 16, an external GPU is required.
@@ -109,8 +109,8 @@ To evaluate the training I use [eval_on_objectattention.py]() and record the AUC
 
 To have a better understanding of the training I evaluated the training with 15 epochs and different values for the batch size and chunk size.
 
-Note that I modified the evaluation code, such that it iterates over all the epoch weights and reports AUC and dist. This code can be found in [eval_on_objectattention_multiepoch.py]().
-To automatize the process, I used a bash script [run_experiments.sh]() that runs the required commands consequently.
+Note that I modified the evaluation code, such that it iterates over all the epoch weights and reports AUC and dist. This code can be found in [eval_on_objectattention_multiepoch.py](https://github.com/shivahanifi/visual-targets/blob/main/VTD_retrain/src/eval_on_objectattention_multiepoch.py).
+To automatize the process, I used a bash script [run_experiments.sh](https://github.com/shivahanifi/visual-targets/blob/main/VTD_retrain/src/run_experiments.sh) that runs the required commands consequently.
 
 The visualization of the AUC and dist for all these scenarios is as follow:
  |batch size \ chunk size | 2 | 3 | 4 |	
