@@ -10,7 +10,9 @@ Here I will document the steps to finetune the VTD architecture using the [Objec
   - [Preparing ObjectAttention dataset to finetune VTD](#preparing-objectattention-dataset-to-finetune-vtd)
   - [Trainining on ObjectAttention](#trainining-on-objectattention)
     - [Initial weights for retraining](#initial-weights-for-retraining)
-    - [Training evaluation](#training-evaluation)
+    - [**Training evaluation for 3 epochs, batch size 16 and chunk size 3**](#training-evaluation-for-3-epochs-batch-size-16-and-chunk-size-3)
+    - [**Training evaluation for 15 epochs, batch size [4,8,16] and chunk size [2,3,4]**](#training-evaluation-for-15-epochs-batch-size-4816-and-chunk-size-234)
+  - [Training on ObjectAttention augmented with VideoAttentionTarget](#training-on-objectattention-augmented-with-videoattentiontarget)
 
 
 ## Feasibility of retraining
@@ -80,7 +82,7 @@ To train on the ObjectAttention dataset the code scripts relatd to the data prep
 
 At this step to have the original batch size of 16, an external GPU is required.
 
-### Training evaluation
+### **Training evaluation for 3 epochs, batch size 16 and chunk size 3**
 To evaluate the training I use [eval_on_objectattention.py]() and record the AUC and dist parameters.
 
 - AUC
@@ -103,3 +105,22 @@ To evaluate the training I use [eval_on_objectattention.py]() and record the AUC
   |  model_videoatttarget.pt 	|  ObjectAttention |epoch_3_weights.pt	|  0.8520 	|  0.1008 	|
   |  model_videoatttarget.pt 	|  ObjectAttention |epoch_3_weights.pt	|  0.8207 	|  0.0919 	|
 
+### **Training evaluation for 15 epochs, batch size [4,8,16] and chunk size [2,3,4]**
+
+To have a better understanding of the training I evaluated the training with 15 epochs and different values for the batch size and chunk size.
+
+Note that I modified the evaluation code, such that it iterates over all the epoch weights and reports AUC and dist. This code can be found in [eval_on_objectattention_multiepoch.py]().
+To automatize the process, I used a bash script [run_experiments.sh]() that runs the required commands consequently.
+
+The visualization of the AUC and dist for all these scenarios is as follow:
+ |batch size \ chunk size | 2 | 3 | 4 |	
+  |---	|---	|---	|---	|
+  | 4 |  <img src=img/auc_dist_bs4_cs2.png> 	| <img src=img/auc_dist_bs4_cs3.png>    | <img src=img/auc_dist_bs4_cs4.png> | 
+  | 8 |  CUDA error!	|  CUDA error!  | CUDA error! |
+  | 16 |  <img src=img/auc_dist_bs16_cs2.png> 	| <img src=img/auc_dist_bs16_cs3.png>| CUDA error! |
+
+
+## Training on ObjectAttention augmented with VideoAttentionTarget
+
+Adding the training images and labels of the 12 shows from VideoAttentionTarget: Veep, Three Idiots, The View, Tartuffle, Suits, Star Wars, Sherlock, Sienfield, Secret, Hearing, Friends, Coveted.
+Also 5 shows from VideoAttentionTarget are added to the test sets: Jamie Oliver, MLB Interview, Survivor, Titanic, West World. This trial failed due to the differnces in image types. (ObjectAttention has .ppm images while VideoAttentionTarget contains .jpg images)
