@@ -5,11 +5,11 @@
 # Path to the frames
 frame_path = '/Users/shiva.hnf/Documents/IIT/VTD_retrain/VTD_dumper_Shiva_modified/VTD_dumper_Shiva/session_5/pringles-masterchef-sugarbox-bleach-mustard/session5-shiva-pringles/renamed_rgb_input'
 # Path to the head bbox annotation XML file
-head_xml_path = '/Users/shiva.hnf/Documents/IIT/VTD_retrain/VTD_dumper_Shiva_modified/VTD_dumper_Shiva/session_5/pringles-masterchef-sugarbox-bleach-mustard/session5-shiva-pringles/Head_bbox_annotation/00000003.xml'
+#head_xml_path = '/Users/shiva.hnf/Documents/IIT/VTD_retrain/VTD_dumper_Shiva_modified/VTD_dumper_Shiva/session_5/pringles-masterchef-sugarbox-bleach-mustard/session5-shiva-pringles/Head_bbox_annotation/00000003.xml'
 # Gaze target name
 gaze_target = 'pringles'
-# Path for the gazed object bbox annotation XML
-target_xml_path = '/Users/shiva.hnf/Documents/IIT/VTD_retrain/VTD_dumper_Shiva_modified/VTD_dumper_Shiva/session_5/pringles-masterchef-sugarbox-bleach-mustard/session5-shiva-pringles/Object_annotations/00000000.xml'
+# Path for the annotation XML
+xml_path = '/Users/shiva.hnf/Documents/IIT/VTD_retrain/VTD_dumper_Shiva_modified/VTD_dumper_Shiva/session_5/pringles-masterchef-sugarbox-bleach-mustard/session5-shiva-pringles/Object_annotations/00000000.xml'
 # Path to save the TXT file
 txt_path = '/Users/shiva.hnf/Documents/IIT/VTD_retrain/VTD_dumper_Shiva_modified/VTD_dumper_Shiva/session_5/pringles-masterchef-sugarbox-bleach-mustard/S52.txt'
 
@@ -17,7 +17,7 @@ txt_path = '/Users/shiva.hnf/Documents/IIT/VTD_retrain/VTD_dumper_Shiva_modified
 import xml.etree.ElementTree as ET
 import os
 
-def head_bbox_info(head_xml_path):
+def head_bbox_info(xml_path):
     """Extract the information related to the head bbox.
     
     :param head_xml_path: str - string indicating the path in which 
@@ -28,19 +28,22 @@ def head_bbox_info(head_xml_path):
     :return ymin: str 
     :return ymax: str 
     """
-    tree = ET.parse(head_xml_path)
+    tree = ET.parse(xml_path)
     root = tree.getroot()
     
     for ann in root.iter('annotation'):
         filename = ann.find('filename').text
-        xmin = ann.find('object/bndbox/xmin').text
-        xmax = ann.find('object/bndbox/xmax').text
-        ymin = ann.find('object/bndbox/ymin').text
-        ymax = ann.find('object/bndbox/ymax').text
+        objects = root.findall('object')
+        for obj in objects:
+            if obj.find('name').text == 'head':
+                xmin = ann.find('object/bndbox/xmin').text
+                xmax = ann.find('object/bndbox/xmax').text
+                ymin = ann.find('object/bndbox/ymin').text
+                ymax = ann.find('object/bndbox/ymax').text
     
     return filename, xmin, xmax, ymin, ymax
 
-def gaze_target_info(target_xml_path, gaze_target):
+def gaze_target_info(xml_path, gaze_target):
     """Extract the information related to the gaze target.
     
     :param target_xml_path: str - string indicating the path in which 
@@ -49,7 +52,7 @@ def gaze_target_info(target_xml_path, gaze_target):
     :return: gaze_x: str - string indicating the x position of the targeted pixel.
     :return: gaze_y: str - string indicating the y position of the targeted pixel.
     """  
-    tree = ET.parse(target_xml_path)
+    tree = ET.parse(xml_path)
     root = tree.getroot()
     objects = root.findall('object')
     for obj in objects:
@@ -77,8 +80,8 @@ def create_new_txt(txt_path):
     f.close()
     
     
-filename, xmin, xmax, ymin, ymax = head_bbox_info(head_xml_path)
-gaze_x, gaze_y = gaze_target_info(target_xml_path, gaze_target)
+filename, xmin, xmax, ymin, ymax = head_bbox_info(xml_path)
+gaze_x, gaze_y = gaze_target_info(xml_path, gaze_target)
 frame_names = frame_name(frame_path)
 
 for frame in frame_names:

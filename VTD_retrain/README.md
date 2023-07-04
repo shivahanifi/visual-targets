@@ -13,6 +13,10 @@ Here I will document the steps to finetune the VTD architecture using the [Objec
     - [**Training evaluation for 3 epochs, batch size 16 and chunk size 3**](#training-evaluation-for-3-epochs-batch-size-16-and-chunk-size-3)
     - [**Training evaluation for 15 epochs, batch size [4,8,16] and chunk size [2,3,4]**](#training-evaluation-for-15-epochs-batch-size-4816-and-chunk-size-234)
   - [Training on ObjectAttention augmented with VideoAttentionTarget](#training-on-objectattention-augmented-with-videoattentiontarget)
+  - [Collecting data for ObjectAttention dataset](#collecting-data-for-objectattention-dataset)
+    - [Data annotation](#data-annotation)
+    - [Data subsampling](#data-subsampling)
+  - [Retraining the model with collected ObjectAttention dataset](#retraining-the-model-with-collected-objectattention-dataset)
 
 
 ## Feasibility of retraining
@@ -124,3 +128,31 @@ The visualization of the AUC and dist for all these scenarios is as follow:
 
 Adding the training images and labels of the 12 shows from VideoAttentionTarget: Veep, Three Idiots, The View, Tartuffle, Suits, Star Wars, Sherlock, Sienfield, Secret, Hearing, Friends, Coveted.
 Also 5 shows from VideoAttentionTarget are added to the test sets: Jamie Oliver, MLB Interview, Survivor, Titanic, West World. This trial failed due to the differnces in image types. (ObjectAttention has .ppm images while VideoAttentionTarget contains .jpg images)
+
+## Collecting data for ObjectAttention dataset
+
+To get a better result from retraining, data from 8 different participants collected to be added to the ObjectAttention dataset. Participants, data, and special notes for each are reported in  [ObjectAttention_Augmentation](https://docs.google.com/spreadsheets/d/14RvBR70ZIDfELIL6YnriLYCk2VSqEYv4hOBjMkG54h8/edit?usp=sharing).
+
+<img src=img/obectattention_augmented.png>
+
+**Modifications applied:**
+
+Simone:
+-  deleted 0-9 , and the last 5-10 for almost all the sessions and settings.
+- Session 3, setting (sugarbox, masterchef, ...), for masterchef deleted 0-104 and also around 10 frames from the end.
+
+### Data annotation
+In order to use this data for the training the head bounding box and gaze target annotations are required. To that end, the head bounding boxes are annotated with OpenPose. The reason to use OpenPose at this step is that OpenPose is used in the pipeline to extract the head bounding boxes and its failiures are affecting the output. Therefore, to make the result of the test sets more reliable, I used  the [run_openpose.py]() script to run OpenPose over all the frames and generate the JSON file for each frame taht consists the keypoint information. These JSON files are then used to extract the head bounding box information to be put in the final annotation TXT file.
+
+Morover, for the objects the [Imglabel]() is utilized to annotate the bounding boxes for the objects present in the scene. These information are collected in a XML file, which is then used to extract the gaze target of the participant. The `gaze_x` and `gaze_y` parameters are extracted considering the target object and taking the center of its bounding box. These values are also collected in the final annotation TXT file.
+
+### Data subsampling
+In this data collection setup, the RGB frames are dropped directly from the output of the RealSense with approximately 30 frames/sec. However, previously the frames were dropped after being propagated through OpenPose with approximately 10 frames/sec. As a result, the number of frames is high. In this regard, all the frames are subsampled (taking every other frame). Consequently, the JSON files are also subsampled.
+
+The target objects of each of the settings is also collected in one folder to match the training data structure.
+
+All the subsampling and annotation extraction are handled in the python script [subsample_rename_annotate.py]().
+
+
+## Retraining the model with collected ObjectAttention dataset
+After structuring the data into the required format, I splited the data into train and test haveing 7 participants on the train set and 3 on the test set. The result of evaluation is as follows:
