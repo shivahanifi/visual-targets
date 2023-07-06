@@ -17,7 +17,8 @@ Here I will document the steps to finetune the VTD architecture using the [Objec
     - [Data annotation](#data-annotation)
     - [Data subsampling](#data-subsampling)
   - [Retraining the model with collected ObjectAttention dataset](#retraining-the-model-with-collected-objectattention-dataset)
-
+    - [Cross validation](#cross-validation)
+  - [ObjectAttention dataset statistics](#objectattention-dataset-statistics)
 
 ## Feasibility of retraining
 The first step is to analyze the feasibility of retraining the VTD architecture. Initial training of VTD is performed in a two-step process. First, the model is globally trained on the GazeFollow dataset until convergence. Second, it is subsequently trained on the VideoAttentionTarget dataset, while freezing the layers up
@@ -142,17 +143,56 @@ Simone:
 - Session 3, setting (sugarbox, masterchef, ...), for masterchef deleted 0-104 and also around 10 frames from the end.
 
 ### Data annotation
-In order to use this data for the training the head bounding box and gaze target annotations are required. To that end, the head bounding boxes are annotated with OpenPose. The reason to use OpenPose at this step is that OpenPose is used in the pipeline to extract the head bounding boxes and its failiures are affecting the output. Therefore, to make the result of the test sets more reliable, I used  the [run_openpose.py]() script to run OpenPose over all the frames and generate the JSON file for each frame taht consists the keypoint information. These JSON files are then used to extract the head bounding box information to be put in the final annotation TXT file.
+In order to use this data for the training the head bounding box and gaze target annotations are required. To that end, the head bounding boxes are annotated with OpenPose. The reason to use OpenPose at this step is that OpenPose is used in the pipeline to extract the head bounding boxes and its failiures are affecting the output. Therefore, to make the result of the test sets more reliable, I used  the [run_openpose.py](https://github.com/shivahanifi/visual-targets/blob/main/VTD_retrain/src/run_openpose.py) script to run OpenPose over all the frames and generate the JSON file for each frame taht consists the keypoint information. These JSON files are then used to extract the head bounding box information to be put in the final annotation TXT file.
 
-Morover, for the objects the [Imglabel]() is utilized to annotate the bounding boxes for the objects present in the scene. These information are collected in a XML file, which is then used to extract the gaze target of the participant. The `gaze_x` and `gaze_y` parameters are extracted considering the target object and taking the center of its bounding box. These values are also collected in the final annotation TXT file.
+Morover, for the objects the [Imglabel](https://github.com/heartexlabs/labelImg) is utilized to annotate the bounding boxes for the objects present in the scene. These information are collected in a XML file, which is then used to extract the gaze target of the participant. The `gaze_x` and `gaze_y` parameters are extracted considering the target object and taking the center of its bounding box. These values are also collected in the final annotation TXT file.
 
 ### Data subsampling
 In this data collection setup, the RGB frames are dropped directly from the output of the RealSense with approximately 30 frames/sec. However, previously the frames were dropped after being propagated through OpenPose with approximately 10 frames/sec. As a result, the number of frames is high. In this regard, all the frames are subsampled (taking every other frame). Consequently, the JSON files are also subsampled.
 
 The target objects of each of the settings is also collected in one folder to match the training data structure.
 
-All the subsampling and annotation extraction are handled in the python script [subsample_rename_annotate.py]().
+All the subsampling and annotation extraction are handled in the python script [subsample_rename_annotate.py](https://github.com/shivahanifi/visual-targets/blob/main/VTD_retrain/src/subsample_rename_annotate.py).
 
 
 ## Retraining the model with collected ObjectAttention dataset
 After structuring the data into the required format, I splited the data into train and test haveing 7 participants on the train set and 3 on the test set. The result of evaluation is as follows:
+
+( Please note that training is done with batch size 4, chunk size 3, and for 15 epochs.)
+
+- The test sets are chosen randomly except for the first one.
+
+|Log name|Test set| evaluation result|
+|--- |---|---|
+|2023-07-04_09-44-44|[Shiva, Gabriele, Simone]|<img src=img/auc_dist_bs4_cs_3__Shiva_Gabriele_Simone.png>|
+|2023-07-04_11-51-16|[Andrea, Simone, Giulia]|<img src=img/auc_dist_bs4_cs3_andrea_simone_giulia.png>|
+|2023-07-04_13-06-51|[Elisa, Gabriele, Stefano]|<img src=img/auc_dist_bs4_cs3_elisa_gabriele_stefano.png>|
+|2023-07-04_14-26-15|[Maria, Francesco, Simone]|<img src=img/auc_dist_bs4_cs3_maria_francesco_simone.png>|
+|2023-07-04_15-26-37|[Elisa, Raffaele, Maria]|<img src=img/auc_dist_bs4_cs3_elisa_raffaele_maria.png>|
+
+### Cross validation
+
+the evaluation result for training on 5 participants and testing for 2 participants.
+
+| Validation set |Test set| evaluation result|
+|---|--- |---|
+|[Giulia, Stefano][2023-07-06_08-02-19]|[Shiva, Gabriele, Simone]|<img src=img/auc_dist_bs4_cs3_giulia_stefano_1.png>|
+|[Raffaele, Stefano][2023-07-05_15-21-57]|[Andrea, Simone, Giulia]|<img src=/Users/shiva.hnf/Documents/IIT/visual-targets/VTD_retrain/img/auc_dist_bs4_cs3_raffaele+stefano_2.png>|
+|[Simone, Maria][2023-07-05_14-33-47]|[Elisa, Gabriele, Stefano]|<img src=/Users/shiva.hnf/Documents/IIT/visual-targets/VTD_retrain/img/auc_dist_bs4_cs3_maria_simone_3.png>|
+|[Stefano, Gabriele][2023-07-05_13-27-41]|[Maria, Francesco, Simone]|<img src=/Users/shiva.hnf/Documents/IIT/visual-targets/VTD_retrain/img/auc_dist_bs4_cs3_stefano_gabriele_4.png>|
+|[Andrea, Simone][2023-07-05_12-32-40]|[Elisa, Raffaele, Maria]| <img src=img/auc_dist_bs4_cs3_andrea_simone_5.png>|
+
+
+## ObjectAttention dataset statistics
+
+In this section the collected dataset will be analyzed from different points of view.
+
+1. Target location density
+
+The script to get this output is [dataset_statistics.py]().   
+|VideoAttentionTarget|Object bounding boxes| fixed_radius circle | object-dependent circles|
+|--- |--- |--- |--- |
+|<img src=img/target_density.jpeg width=120>|<img src=img/object_location_density.png>|<img src=img/object_location_density_circles_fixedRadius.png>|<img src=/Users/shiva.hnf/Documents/IIT/visual-targets/VTD_retrain/img/object_location_density_circles.png>|
+
+
+
